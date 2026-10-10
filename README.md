@@ -39,7 +39,20 @@ Directory name equals the `name` field. Templates live in `assets/` so they are 
 
 Pick one route per agent: the plugin updates itself, skills.sh copies editable files you update by hand. Installing both gives you every skill twice.
 
-### Claude Code
+### skills.sh (recommended, any agent)
+
+```bash
+npx skills@latest add esavard/agent-skills            # all skills, choose agents interactively
+npx skills@latest add esavard/agent-skills --skill=spec-implement
+```
+
+Copies the skills into `.agents/skills/` (add `-g` for user level) and links them for each selected agent, e.g. `-a claude-code -a codex`. Update with `npx skills@latest update`. Install all three skills together: `spec-interview` hands off to `spec-implement` and calls `spec-conventions-interview`.
+
+### Plugin (managed updates)
+
+Alternative to skills.sh, not in addition: the plugin updates itself but its files are read-only.
+
+#### Claude Code
 
 ```bash
 claude plugin marketplace add esavard/agent-skills
@@ -48,28 +61,19 @@ claude plugin install esavard-agent-skills@esavard
 
 Inside a session: `/plugin install esavard-agent-skills --marketplace esavard/agent-skills`.
 
-### Codex
+#### Codex
 
 ```bash
 codex plugin marketplace add esavard/agent-skills
 codex plugin add esavard-agent-skills@esavard
 ```
 
-### GitHub Copilot CLI
+#### GitHub Copilot CLI
 
 ```bash
 copilot plugin marketplace add esavard/agent-skills
 copilot plugin install esavard-agent-skills@esavard
 ```
-
-### Any other agent, or editable copies (skills.sh)
-
-```bash
-npx skills@latest add esavard/agent-skills            # all skills, choose agent interactively
-npx skills@latest add esavard/agent-skills --skill=spec-implement
-```
-
-Update with `npx skills@latest update`. Install all three skills together: `spec-interview` hands off to `spec-implement` and calls `spec-conventions-interview`.
 
 ## Checkbox protocol
 
