@@ -17,5 +17,10 @@ jobs:
         run: |
           pip install skills-ref
           for dir in skills/*/; do agentskills validate "$dir"; done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate plugin manifests
+        run: npx -y @anthropic-ai/claude-code plugin validate . --strict
       - name: Test helper scripts
         run: python -m unittest discover -s tests -v

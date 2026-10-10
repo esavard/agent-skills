@@ -1,5 +1,7 @@
 # agent-skills
 
+[![skills.sh](https://skills.sh/b/esavard/agent-skills)](https://skills.sh/esavard/agent-skills)
+
 Spec-driven development skills for coding agents, following the [Agent Skills](https://agentskills.io) open format (`SKILL.md` + YAML frontmatter). Works with any agent that supports the format (Claude Code, Codex, and others).
 
 The workflow splits planning and execution into separate sessions so each one stays small and cache-friendly:
@@ -26,23 +28,48 @@ skills/
     SKILL.md        # frontmatter (name, description, license, metadata) + instructions
     assets/         # templates loaded only when needed
     scripts/        # executable helpers
-tests/              # unit tests for scripts
+    agents/openai.yaml  # Codex skill-picker metadata
+.claude-plugin/     # plugin.json + marketplace.json (Claude Code, Codex, Copilot)
+tests/              # unit tests for scripts and manifest sync
 ```
 
 Directory name equals the `name` field. Templates live in `assets/` so they are loaded on demand rather than on every activation.
 
 ## Install
 
-Copy or symlink a skill directory into your agent's skills folder:
+Pick one route per agent: the plugin updates itself, skills.sh copies editable files you update by hand. Installing both gives you every skill twice.
+
+### Claude Code
 
 ```bash
-git clone https://github.com/esavard/agent-skills ~/agent-skills
-# Claude Code (user level; use .claude/skills/ inside a repo for project level)
-mkdir -p ~/.claude/skills
-ln -s ~/agent-skills/skills/* ~/.claude/skills/
+claude plugin marketplace add esavard/agent-skills
+claude plugin install esavard-agent-skills@esavard
 ```
 
-For other agents (Codex, etc.), link `skills/*` into the skills directory documented by that agent. Install all three skills together: `spec-interview` hands off to `spec-implement` and calls `spec-conventions-interview`.
+Inside a session: `/plugin install esavard-agent-skills --marketplace esavard/agent-skills`.
+
+### Codex
+
+```bash
+codex plugin marketplace add esavard/agent-skills
+codex plugin add esavard-agent-skills@esavard
+```
+
+### GitHub Copilot CLI
+
+```bash
+copilot plugin marketplace add esavard/agent-skills
+copilot plugin install esavard-agent-skills@esavard
+```
+
+### Any other agent, or editable copies (skills.sh)
+
+```bash
+npx skills@latest add esavard/agent-skills            # all skills, choose agent interactively
+npx skills@latest add esavard/agent-skills --skill=spec-implement
+```
+
+Update with `npx skills@latest update`. Install all three skills together: `spec-interview` hands off to `spec-implement` and calls `spec-conventions-interview`.
 
 ## Checkbox protocol
 
@@ -64,6 +91,9 @@ Optional hard enforcement: run the script from your agent's end-of-turn hook (e.
 pip install skills-ref
 for d in skills/*/; do agentskills validate "$d"; done
 python3 -m unittest discover -s tests -v
+claude plugin validate . --strict
 ```
+
+Release: bump `version` in `.claude-plugin/plugin.json`; plugin installs only update when it changes.
 
 CI runs the same commands (`.github/workflows/validate.yml`).

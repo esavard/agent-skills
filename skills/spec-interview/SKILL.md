@@ -36,7 +36,7 @@ The agent is often launched from a subdirectory. Files must not land there silen
 
 Before interviewing about the feature itself, check `CONVENTIONS.md` at `<root>`:
 
-- **Missing, empty, or clearly self-contradictory**: stop and invoke `spec-conventions-interview` first (or tell the user to run it). Do not draft engineering rules ad hoc inside the spec. Pass it the `<root>` already resolved in Step 0 so the user isn't asked twice. Resume this skill once `CONVENTIONS.md` exists.
+- **Missing, empty, or clearly self-contradictory**: stop and call the Skill tool with `spec-conventions-interview` first (if the harness has no Skill tool, tell the user to run it). Do not draft engineering rules ad hoc inside the spec. Pass it the `<root>` already resolved in Step 0 so the user isn't asked twice. Resume this skill once `CONVENTIONS.md` exists.
 - **Present and coherent**: read it, note its rules, continue directly to Phase 1. Do not re-litigate settled conventions during the feature interview.
 
 ## Phase 1: Interview
