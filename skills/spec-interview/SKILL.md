@@ -16,12 +16,15 @@ Write the spec file in English, regardless of the language the interview was con
 
 When the spec is agreed upon, tell the user they MUST start a new session. Be insistent about it.
 
-## Concept: Spec = Point-in-Time Record
+## Concept: Spec = Point-in-Time Record (ADR style)
 
-- Files under `docs/specs/spec_NNN_<short_feature_description>.md` are point-in-time decision records and single-use execution contracts (ADR style).
-- They are NOT living system documentation.
-- The ONLY source of truth is the codebase itself: active code, unit/architecture tests, and `CONVENTIONS.md`.
-- When preparing a new spec, reference past specs ONLY to understand historical intent or discover existing patterns—never as the absolute definition of current system state.
+The source code is ALWAYS the source of truth. A spec NEVER is. This rule overrides anything a past spec says.
+
+- A file under `docs/specs/spec_NNN_<short_feature_description>.md` works like an ADR: a snapshot of one development effort at a given moment in the life of the repository, and a single-use execution contract for that effort.
+- It is NOT living system documentation. Once the feature is built, the spec stays as a record of what was decided and why.
+- Never edit a past spec to make it follow the code. The only edits allowed after a spec is agreed are the implementing agent ticking its checkboxes during that spec's own implementation. If the code later diverges, the code is right; a new decision gets a new spec.
+- Current system state comes from the codebase only: active code, unit/architecture tests, and `CONVENTIONS.md`.
+- When preparing a new spec, read past specs ONLY for historical intent. Any fact taken from a past spec (path, module, contract, pattern, behavior) MUST be verified against the current code before it is used in a question, a proposed default, or the new spec. If spec and code disagree, use the code and tell the user about the divergence.
 
 ## Phase 0 — Conventions precondition
 
@@ -40,14 +43,14 @@ To keep context lean and speed up answers:
 - Allow the user to answer with single letters/words.
 
 Ground questions in the codebase, not blind guesses:
-- Search `docs/specs/`, and the relevant service directories for prior art before asking something the code already answers.
-- If a related spec or WBS phase doc already exists, read it and ask the user to confirm/narrow it rather than starting from zero.
+- Search the relevant service directories first, then `docs/specs/`, for prior art before asking something the code already answers.
+- If a related spec or WBS phase doc already exists, read it for intent, check what it describes against the current code, and ask the user to confirm/narrow it rather than starting from zero. Never present a past spec's content as the current state of the system without that check.
 
 Challenge vague terms on sight. Words like "fast", "robust", "secure", "simple", "handle errors", "support X" must be pinned to something concrete (a number, a specific failure mode, a specific mechanism) before the interview moves on. Do not let a vague answer stand — ask a follow-up that forces the definition.
 
 If the user answers "I don't know" or "whatever you think" on a scope/requirement/architecture question, never fall back to a vague "industry best practice" claim — that's an unverifiable hallucination risk. Propose a default in this priority order, and say out loud which tier it came from:
-1. **Existing docs/specs or WBS docs in this repo** — reuse the pattern already used elsewhere (cite the file/section).
-2. **Existing code/config in this repo** — an already-implemented pattern doing the equivalent job elsewhere in the codebase (cite the file).
+1. **Existing code/config in this repo** — an already-implemented pattern doing the equivalent job elsewhere in the codebase (cite the file).
+2. **Existing docs/specs or WBS docs in this repo** — a pattern decided in a past spec, only after confirming the code still follows it (cite the spec section and the code file).
 3. **A verifiable industry-consensus default, not a vibe** — the pattern/library must be the de facto standard for that exact problem, and you must be able to name *why* it's consensus (dominant adoption for that job, official framework-recommended pattern) rather than just asserting "best practice." State the name + the one-line reason it counts as consensus.
 4. **The Base Template below**, if nothing else applies (first spec ever in this repo).
 Whichever tier is used, ask for a yes/no confirmation rather than leaving it open.
@@ -59,7 +62,12 @@ Cover these areas, skipping anything the codebase or an existing doc already ans
 3. **Out of scope** — what looks related but is explicitly excluded. If the user doesn't volunteer this, ask directly — silence here is how scope creep happens later.
 4. **Context** — relevant modules/paths (confirm via a quick repo look, don't just take the user's word), tech stack, existing architecture notes, related specs/prior decisions, spec nature (`Domain logic` / `UI/presentation only` / `Mixed`).
 5. **Architecture** — enough detail to draw a Mermaid diagram (components/adapters involved, data flow direction, what's a Command vs an Event if `CONVENTIONS.md` says this project uses DDD).
-5b. **Architecture-test ordering** — if `CONVENTIONS.md` §2 applies (spec nature `Domain logic` or `Mixed`), ask whether architecture tests can genuinely be written before any production code exists for this spec, or whether a package/module must exist first for the tool (e.g. `import-linter`) to discover it. Offer: A) full test-first is feasible, B) minimal empty skeleton needed first, then tests, then implementation (per `CONVENTIONS.md` §2's exception clause), C) not applicable — skip. Record the answer verbatim in the spec's `## 7. Engineering Rules` section so the ordering exception is decided upfront, not discovered and retrofitted mid-implementation.
+5b. **Architecture tests: skeleton first, then grow** — if `CONVENTIONS.md` requires architecture tests and the spec nature is `Domain logic` or `Mixed`, do NOT ask the user to choose between a skeleton and a complete architecture-test suite, and do not offer it as an A/B option. The approach is fixed. Tell the user, as a statement they can object to, that implementation will proceed this way:
+   1. Start with a skeleton architecture-test suite covering only the boundaries the spec already fixes (the layers/modules named in the Architecture section), creating the minimal empty packages/modules the tool (e.g. ArchUnit, `import-linter`) needs to discover them.
+   2. Extend the suite during implementation, adding a rule each time a new element or boundary is confirmed by the code being written.
+   3. Finish with a suite that covers every boundary the feature introduced; this is a Definition of Done item.
+
+   Record these three steps in the spec's `## 7. Engineering Rules` section and add the matching checkbox to `## 8. Definition of Done`. Ask a question here only if the spec introduces a boundary whose direction of dependency is genuinely undecided; that is an Architecture question (item 5), not a test-ordering one. Skip this item entirely for `UI/presentation only` specs or when `CONVENTIONS.md` does not require architecture tests. If `CONVENTIONS.md` states a different ordering (e.g. full test-first with an exception clause), still use the skeleton-then-grow approach, tell the user about the mismatch, and suggest running `spec-conventions-interview` to update that section.
 6. **Requirements & acceptance criteria** — each requirement must map to an observable, checkable acceptance criterion. Reject requirements phrased only as intentions ("should be reliable") — ask for the specific condition that would make it false.
 7. **Deliverables** — concrete artifacts (files, modules, test suites) expected at the end.
 8. **Implementation phasing** — only ask if the feature is large enough to warrant it (multiple independent milestones); skip for small specs.
@@ -81,13 +89,16 @@ Only after the ambiguity is resolved:
    - `## 6. Implementation Plan` (only if phasing was discussed; omit section otherwise)
    - `## 7. Engineering Rules` — do **not** repeat the boilerplate; write: "Follow `CONVENTIONS.md`." plus only the deltas/exceptions specific to this spec, if any.
    - `## 8. Definition of Done` (standard checklist derived from `CONVENTIONS.md` + feature-specific items from the interview)
-3. At top of `## 4. Requirements` and `## 8. Definition of Done`, insert this instruction line verbatim, addressed to implementing agent: `> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item completes. Do not batch checkbox updates to end of session — re-prompting agent to backfill them is wasted turn.`
-4. Present the full file to the user for review before considering the spec final. Call out any answer you inferred rather than asked, so the user can correct it.
+3. Directly under the spec's title, insert this line verbatim: `> Point-in-time record (ADR style): snapshot of one development effort, written <YYYY-MM-DD>. Source code is always the source of truth, never this spec. Implementing agent: if this spec disagrees with the current code, stop and ask. Do not update this file to follow later code changes.` Replace `<YYYY-MM-DD>` with the date the spec is written.
+4. At top of `## 4. Requirements` and `## 8. Definition of Done`, insert this instruction line verbatim, addressed to implementing agent: `> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item completes. Do not batch checkbox updates to end of session — re-prompting agent to backfill them is wasted turn.`
+5. Present the full file to the user for review before considering the spec final. Call out any answer you inferred rather than asked, so the user can correct it.
 
 ### Base Template (first spec in a repo, no prior art to match)
 
 ```markdown
 # spec_001_<short_feature_description>
+
+> Point-in-time record (ADR style): snapshot of one development effort, written <YYYY-MM-DD>. Source code is always the source of truth, never this spec. Implementing agent: if this spec disagrees with the current code, stop and ask. Do not update this file to follow later code changes.
 
 ## 1. Spec
 **Title:** <one line>
@@ -137,11 +148,14 @@ When the spec is complete and agreed upon:
 1. Explicitly instruct the user to **STOP and open a FRESH session** before writing any code. Be insistent—explain that keeping execution separate from the interview context prevents hallucinations and saves tokens.
 2. Provide a ready-to-copy kick-off message for the new session, formatted like this:
 
-> "I am starting implementation for `docs/specs/spec_NNN_<short_feature_description>.md`. Follow `CONVENTIONS.md` for architecture rules. Remember to update checkboxes `[ ]` → `[x]` as you complete each item. Let's begin with Phase 1 tasks."
+> "Implement `docs/specs/spec_NNN_<short_feature_description>.md`."
+
+Keep the kick-off message to that one line. The rules the implementing agent needs (follow `CONVENTIONS.md`, source code is the source of truth, tick checkboxes as items complete) are already written in the spec file itself; do not repeat them in the message.
 
 ## Guardrails
 
 - Never write the spec file before the interview has resolved scope, out-of-scope, and acceptance criteria — a spec drafted from a vague answer is worse than no spec.
+- Never treat a past spec as the current state of the system, and never edit a past spec to match the code. Source code is always the source of truth; verify against it.
 - Do not duplicate `CONVENTIONS.md` content into the spec; reference it.
 - Do not invent file paths, modules, or tech stack choices without confirming them against the actual repo state.
 - Do not silently expand scope beyond what the user described — if you notice an adjacent need, flag it as a question or as explicitly out-of-scope, don't fold it in.

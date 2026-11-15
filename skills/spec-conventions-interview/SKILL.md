@@ -50,6 +50,13 @@ Ask about each of these, skipping any the codebase already answers unambiguously
    | Rust | workspace crate boundaries (compiler-enforced) + `cargo-deny` |
 
    Don't assume Python — grep for manifest files (`pyproject.toml`, `pom.xml`/`build.gradle`, `go.mod`, `package.json`, `*.csproj`, `Cargo.toml`) to detect stack before naming a tool.
+
+   Ordering is fixed; do not ask the user whether architecture tests come as a skeleton or as a complete suite, and do not write a "tests before any production code" rule with an exception clause. When architecture tests are required, record this rule in `CONVENTIONS.md` §2 as-is:
+   - Each spec starts with a skeleton architecture-test suite covering only the boundaries the spec already fixes, plus the minimal empty packages/modules the tool needs to discover them.
+   - The agent adds a rule each time a new element or boundary is confirmed during implementation.
+   - The spec is done only when the suite covers every boundary the feature introduced.
+
+   If an existing `CONVENTIONS.md` states a different ordering (e.g. full test-first with an exception clause), point it out and propose replacing it with the rule above.
 3. **DDD usage** — does this codebase use ubiquitous language / commands / aggregates / domain events, or is that overkill for its current scope? If yes, where is the ubiquitous language documented today?
 4. **SOLID / Clean Code stance** — any repo-specific exceptions to the standard rules (e.g. a deliberate god-object, a naming convention that looks like an abbreviation but is idiomatic here)?
 5. **Testing rules** — required test types (unit/integration/e2e), where integration tests live vs unit tests, whether Given/When/Then or another convention is expected, coverage expectations if any.
@@ -78,6 +85,7 @@ Boundaries: <folder-per-layer names, e.g. domain/ application/ infrastructure/>
 ## 2. Architecture Enforcement
 Tool: <none yet | tool name from stack table>
 Threshold: <always | above N modules/LOC>
+Ordering: skeleton suite first (boundaries fixed by the spec), extended as boundaries are confirmed during implementation, complete for the feature at Definition of Done
 
 ## 3. DDD Usage
 Used: <yes/no>
