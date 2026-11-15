@@ -1,0 +1,37 @@
+name: Skill problem
+description: A skill did not trigger, triggered wrongly, or the agent misapplied it.
+labels: [bug]
+body:
+  - type: input
+    id: skill
+    attributes:
+      label: Skill
+      placeholder: spec-interview
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and model
+      placeholder: Claude Code 2.x, Claude Sonnet
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: What you asked
+      description: The prompt, with private details removed.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What the agent did
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
