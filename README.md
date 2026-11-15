@@ -67,6 +67,22 @@ like an ADR: a snapshot of one development effort at a given moment in the life 
 repository. Once the feature is built, the spec stays as a record of what was decided and why.
 It is not updated to follow the code, and later specs read it only for historical intent.
 
+### Adapting the workflow to one repository
+
+Do not fork a skill to fit a repository. Put the repository's own rules in a section of its
+`AGENTS.md` (or `CLAUDE.md`), and both skills apply them on top of the generic workflow:
+
+```markdown
+## Spec workflow overrides
+- Specs for an app go in `apps/<slug>/docs/specs/`, numbered per app.
+- `CONVENTIONS.md` at the monorepo root applies to every app.
+- Definition of Done always includes: `make verify` passes.
+- Hand-off: the new session starts with the `app-builder` skill.
+```
+
+The section can change where specs and `CONVENTIONS.md` live, what to read or run before the
+interview, the Definition of Done and the hand-off. It cannot relax the interview itself.
+
 ## Skills
 
 | Skill | Description |
@@ -101,6 +117,16 @@ npx skills update spec-interview
 ```
 
 Add `-g` to update only global skills, `-p` for project skills, or `-y` to skip the scope prompt.
+
+## Use in a project without committing a copy
+
+`npx skills add` records what it installed in `skills-lock.json`. Commit that file, ignore the
+installed directories, and each clone restores the skills from this repository:
+
+```bash
+npx skills add esavard/agent-skills -y     # once: writes skills-lock.json
+npx skills install                         # in a fresh clone: restores from skills-lock.json
+```
 
 ## Usage
 

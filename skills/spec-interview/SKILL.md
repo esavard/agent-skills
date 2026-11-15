@@ -8,13 +8,27 @@ license: MIT
 
 Use this skill when the user has a rough idea, a bare-bones prompt, or a one-line feature request and wants a rigorous spec before any code gets written. The skill acts as an interviewer, not a stenographer: it interrogates the premise, forces precise definitions, and only writes the spec once the answers actually resolve the ambiguity.
 
-Output lands in `docs/specs/` **at the project root — never relative to the current working directory**. Every `docs/specs/` and `CONVENTIONS.md` path in this skill is anchored to the project root. Resolve the root once, before anything else: run `git rev-parse --show-toplevel`; if that fails (not a git repo), walk up from the current directory to the nearest ancestor containing `CONVENTIONS.md` or `docs/specs/`; if still unresolved, ask the user. If the session was started in a subdirectory, do not create a `docs/specs/` there, even if that subdirectory looks like a self-contained package or service.
+Output lands in `docs/specs/` **at the project root — never relative to the current working directory**. Every `docs/specs/` and `CONVENTIONS.md` path in this skill is anchored to the project root. Resolve the root once, before anything else: run `git rev-parse --show-toplevel`; if that fails (not a git repo), walk up from the current directory to the nearest ancestor containing `CONVENTIONS.md` or `docs/specs/`; if still unresolved, ask the user. If the session was started in a subdirectory, do not create a `docs/specs/` there, even if that subdirectory looks like a self-contained package or service. The only exception is a project override that names another location (see "Project overrides").
 
 If prior specs exist there, match their format. If `docs/specs/` is empty (first spec ever in this repo), use the section structure in Phase 2 directly — it's tech-agnostic and doesn't require prior art to follow.
 
 Write the spec file in English, regardless of the language the interview was conducted in, unless the user explicitly asks for a different language.
 
 When the spec is agreed upon, tell the user they MUST start a new session. Be insistent about it.
+
+## Project overrides
+
+Some repositories adapt this workflow: a monorepo with one spec directory per app, a `CONVENTIONS.md` shared by several nested repositories, extra Definition of Done items, a dedicated skill for the implementation session. Those rules belong to the repository, not to this skill, so a repository never needs its own modified copy of this file.
+
+Before Phase 0, read the agent instructions that apply to the project: `AGENTS.md`, `CLAUDE.md` or equivalent at the project root, plus any file they tell you to read first (a nested repository often points to its parent's). If they contain a section about the spec workflow (for example `## Spec workflow overrides`), its rules take precedence over this skill, on these points only:
+
+- where specs are written and how they are numbered (replaces `<project-root>/docs/specs/`);
+- where `CONVENTIONS.md` lives;
+- context to read, commands to run or reuse checks to make before or during the interview;
+- extra Definition of Done items;
+- the hand-off message, and what the user does with the accepted spec.
+
+Everything else here still applies: one question at a time, no vague term left standing, source code as the source of truth, no spec file before the ambiguity is resolved. Tell the user once, at the start of the interview, which overrides you are applying. No such section: nothing changes.
 
 ## Concept: Spec = Point-in-Time Record (ADR style)
 
