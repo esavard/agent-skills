@@ -20,3 +20,8 @@ jobs:
         run: node scripts/validate-skills.mjs
       - name: Check discovery by the skills CLI
         run: npx --yes skills add . --list
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test helper scripts
+        run: python -m unittest discover -s tests -v

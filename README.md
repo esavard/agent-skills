@@ -56,9 +56,11 @@ flowchart TD
 2. **Spec, once per feature.** `spec-interview` turns the idea into
    `docs/specs/spec_NNN_<feature>.md`: scope, out of scope, an architecture diagram,
    requirements with acceptance criteria, and a definition of done.
-3. **Implementation, in a fresh session.** The skill hands you a kick-off message to paste into
-   a new session. The agent works from the spec and `CONVENTIONS.md` and ticks each checkbox as
-   it completes the item.
+3. **Implementation, in a fresh session.** `spec-interview` hands you a one-line kick-off
+   message to paste into a new session. `spec-implement` then works from the spec and
+   `CONVENTIONS.md`. It ticks each checkbox the moment the item is verified, and an item left
+   unchecked needs `(manual)` or `NOT DONE: <reason>`. It cannot report the work as finished
+   until `scripts/check_spec.py` passes, so a green summary never hides an unchecked box.
 
 ### Specs are snapshots, not documentation
 
@@ -70,7 +72,7 @@ It is not updated to follow the code, and later specs read it only for historica
 ### Adapting the workflow to one repository
 
 Do not fork a skill to fit a repository. Put the repository's own rules in a section of its
-`AGENTS.md` (or `CLAUDE.md`), and both skills apply them on top of the generic workflow:
+`AGENTS.md` (or `CLAUDE.md`), and the skills apply them on top of the generic workflow:
 
 ```markdown
 ## Spec workflow overrides
@@ -81,7 +83,8 @@ Do not fork a skill to fit a repository. Put the repository's own rules in a sec
 ```
 
 The section can change where specs and `CONVENTIONS.md` live, what to read or run before the
-interview, the Definition of Done and the hand-off. It cannot relax the interview itself.
+interview, the Definition of Done and the hand-off. It cannot relax the interview itself, nor
+the checkbox protocol and completion gate of `spec-implement`.
 
 ## Skills
 
@@ -89,6 +92,7 @@ interview, the Definition of Done and the hand-off. It cannot relax the intervie
 | --- | --- |
 | [spec-interview](skills/spec-interview/SKILL.md) | Turns a rough feature idea into a spec file under `docs/specs/` by interviewing you one question at a time. |
 | [spec-conventions-interview](skills/spec-conventions-interview/SKILL.md) | Establishes or repairs the repo's `CONVENTIONS.md` through an interview. Prerequisite of `spec-interview`. |
+| [spec-implement](skills/spec-implement/SKILL.md) | Implements one spec in a fresh session, ticks its checkboxes as items are verified, and cannot finish until `scripts/check_spec.py` passes. |
 
 ## Install
 
