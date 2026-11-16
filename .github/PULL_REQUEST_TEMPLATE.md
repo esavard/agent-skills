@@ -8,7 +8,7 @@
 
 ## Checklist
 
-- [ ] `node scripts/validate-skills.mjs` passes
+- [ ] `node scripts/validate-skills.mjs` and `python3 -m unittest discover -s tests` pass
 - [ ] New skill: listed in the README "Skills" table
 - [ ] Ran at least one real session with the skill installed
 - [ ] No private paths, organisation names, secrets or personal data

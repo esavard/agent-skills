@@ -107,7 +107,23 @@ npx skills add esavard/agent-skills --list
 npx skills add esavard/agent-skills --skill spec-interview
 ```
 
+### Plugin (Claude Code, managed updates)
+
+An alternative to skills.sh, not in addition to it (installing both gives you every skill
+twice). The plugin updates itself, but its files are read-only.
+
+```bash
+claude plugin marketplace add esavard/agent-skills
+claude plugin install esavard-agent-skills@esavard
+```
+
+Inside a session: `/plugin install esavard-agent-skills --marketplace esavard/agent-skills`.
+Install all three skills together: `spec-interview` hands off to `spec-implement` and calls
+`spec-conventions-interview`.
+
 ## Update
+
+Skills installed with skills.sh:
 
 ```bash
 # see which installed skills have a newer version
@@ -121,6 +137,7 @@ npx skills update spec-interview
 ```
 
 Add `-g` to update only global skills, `-p` for project skills, or `-y` to skip the scope prompt.
+A plugin install updates through Claude Code's `/plugin` manager instead.
 
 ## Use in a project without committing a copy
 
@@ -146,7 +163,13 @@ frontmatter (`name`, `description`):
 skills/
   <skill-name>/
     SKILL.md
+    agents/openai.yaml    # Codex skill-picker metadata
+    scripts/              # optional helpers (e.g. spec-implement/scripts/check_spec.py)
+.claude-plugin/           # plugin.json + marketplace.json
+tests/                    # unit tests for helper scripts and manifest sync
 ```
+
+The plugin manifest must list every skill; `tests/test_manifest.py` fails when it does not.
 
 ## Contributing
 

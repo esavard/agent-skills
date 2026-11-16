@@ -1,0 +1,3 @@
+interface:
+  display_name: "Spec Interview"
+  short_description: "Interview a rough idea into a spec under docs/specs/"

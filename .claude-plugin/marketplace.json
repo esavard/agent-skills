@@ -1,0 +1,17 @@
+{
+  "name": "esavard",
+  "owner": {
+    "name": "Etienne Savard",
+    "url": "https://github.com/esavard"
+  },
+  "description": "Etienne Savard's agent skills, as an installable plugin.",
+  "plugins": [
+    {
+      "name": "esavard-agent-skills",
+      "source": "./",
+      "description": "Spec-driven development skills: conventions interview, spec interview, and checkbox-enforced spec implementation.",
+      "category": "development",
+      "keywords": ["spec", "interview", "conventions", "planning", "checklist"]
+    }
+  ]
+}

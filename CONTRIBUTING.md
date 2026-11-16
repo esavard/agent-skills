@@ -38,12 +38,14 @@ A skill fits this repository when it:
    Instructions for the agent.
    ```
 
-3. Add a row for it in the "Skills" table of `README.md`.
+3. Add a row for it in the "Skills" table of `README.md`, add it to `skills` in
+   `.claude-plugin/plugin.json`, and give it an `agents/openai.yaml` (a test checks both).
 4. Validate:
 
    ```bash
    node scripts/validate-skills.mjs
    npx skills add . --list        # the CLI must discover your skill
+   python3 -m unittest discover -s tests   # manifest sync and helper scripts
    ```
 
 5. Try it for real: install it into a scratch project (`npx skills add /path/to/your/clone`) and run
@@ -66,7 +68,7 @@ A skill fits this repository when it:
 
 ## Pull request review
 
-CI runs `scripts/validate-skills.mjs` on every pull request. A maintainer then checks that the skill
+CI runs `scripts/validate-skills.mjs`, the unit tests and the plugin manifest validation on every pull request. A maintainer then checks that the skill
 is in scope, reads clearly, and does not instruct an agent to do anything destructive or surprising
 (deleting files, pushing, sending data to external services) without the user asking for it.
 
