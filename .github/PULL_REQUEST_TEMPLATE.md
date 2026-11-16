@@ -8,8 +8,11 @@
 
 ## Checklist
 
-- [ ] `python3 scripts/validate_skills.py` and `python3 -m unittest discover -s tests` pass
-- [ ] New skill: listed in the README "Skills" table
+- [ ] `python3 scripts/validate_skills.py` passes
+- [ ] `python3 -m unittest discover -s tests` passes
+- [ ] New skill: listed in the README "Skills" table and in `skills` of `.claude-plugin/plugin.json`, with an `agents/openai.yaml`
+- [ ] Plugin manifest or install docs changed: `claude plugin validate . --strict` passes
+- [ ] Changed a skill's behavior: the README workflow section still matches
 - [ ] Ran at least one real session with the skill installed
 - [ ] No private paths, organisation names, secrets or personal data
 - [ ] One skill or one concern in this pull request
