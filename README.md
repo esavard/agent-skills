@@ -76,10 +76,11 @@ Do not fork a skill to fit a repository. Put the repository's own rules in a sec
 
 ```markdown
 ## Spec workflow overrides
-- Specs for an app go in `apps/<slug>/docs/specs/`, numbered per app.
-- `CONVENTIONS.md` at the monorepo root applies to every app.
-- Definition of Done always includes: `make verify` passes.
-- Hand-off: the new session starts with the `app-builder` skill.
+- Specs go in `<directory>/docs/specs/`, numbered per `<scope>`.
+- Use the shared `CONVENTIONS.md` at `<path>`.
+- Before the interview, read `<file>` and run `<command>`.
+- Definition of Done always includes: `<verification command>` passes.
+- Hand-off: the new session starts with `<skill or instruction>`.
 ```
 
 The section can change where specs and `CONVENTIONS.md` live, what to read or run before the

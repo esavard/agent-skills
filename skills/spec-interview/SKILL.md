@@ -18,7 +18,7 @@ When the spec is agreed upon, tell the user they MUST start a new session. Be in
 
 ## Project overrides
 
-Some repositories adapt this workflow: a monorepo with one spec directory per app, a `CONVENTIONS.md` shared by several nested repositories, extra Definition of Done items, a dedicated skill for the implementation session. Those rules belong to the repository, not to this skill, so a repository never needs its own modified copy of this file.
+Some repositories adapt this workflow: specs kept in another directory, a `CONVENTIONS.md` shared with other repositories, extra Definition of Done items, a different skill for the implementation session. Those rules belong to the repository, not to this skill, so a repository never needs its own modified copy of this file.
 
 Before Phase 0, read the agent instructions that apply to the project: `AGENTS.md`, `CLAUDE.md` or equivalent at the project root, plus any file they tell you to read first (a nested repository often points to its parent's). If they contain a section about the spec workflow (for example `## Spec workflow overrides`), its rules take precedence over this skill, on these points only:
 
