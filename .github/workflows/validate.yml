@@ -13,17 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate SKILL.md files
-        run: node scripts/validate-skills.mjs
-      - name: Check discovery by the skills CLI
-        run: npx --yes skills add . --list
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Validate SKILL.md files
+        run: python scripts/validate_skills.py
       - name: Test helper scripts
         run: python -m unittest discover -s tests -v
+      # The two checks below run third-party Node CLIs (skills.sh, Claude Code).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check discovery by the skills CLI
+        run: npx --yes skills add . --list
       - name: Validate plugin manifests
         run: npx --yes @anthropic-ai/claude-code plugin validate . --strict

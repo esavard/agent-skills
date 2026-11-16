@@ -176,7 +176,8 @@ The plugin manifest must list every skill; `tests/test_manifest.py` fails when i
 See [CONTRIBUTING.md](CONTRIBUTING.md). Validate changes with:
 
 ```bash
-node scripts/validate-skills.mjs
+python3 scripts/validate_skills.py
+python3 -m unittest discover -s tests
 ```
 
 ## License

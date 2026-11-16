@@ -43,7 +43,7 @@ A skill fits this repository when it:
 4. Validate:
 
    ```bash
-   node scripts/validate-skills.mjs
+   python3 scripts/validate_skills.py
    npx skills add . --list        # the CLI must discover your skill
    python3 -m unittest discover -s tests   # manifest sync and helper scripts
    ```
@@ -68,7 +68,7 @@ A skill fits this repository when it:
 
 ## Pull request review
 
-CI runs `scripts/validate-skills.mjs`, the unit tests and the plugin manifest validation on every pull request. A maintainer then checks that the skill
+CI runs `scripts/validate_skills.py`, the unit tests and the plugin manifest validation on every pull request. A maintainer then checks that the skill
 is in scope, reads clearly, and does not instruct an agent to do anything destructive or surprising
 (deleting files, pushing, sending data to external services) without the user asking for it.
 
