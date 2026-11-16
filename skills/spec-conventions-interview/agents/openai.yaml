@@ -1,0 +1,3 @@
+interface:
+  display_name: "Spec Conventions Interview"
+  short_description: "Establish or repair CONVENTIONS.md at repo root"

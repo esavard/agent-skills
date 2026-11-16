@@ -56,9 +56,11 @@ flowchart TD
 2. **Spec, once per feature.** `spec-interview` turns the idea into
    `docs/specs/spec_NNN_<feature>.md`: scope, out of scope, an architecture diagram,
    requirements with acceptance criteria, and a definition of done.
-3. **Implementation, in a fresh session.** The skill hands you a kick-off message to paste into
-   a new session. The agent works from the spec and `CONVENTIONS.md` and ticks each checkbox as
-   it completes the item.
+3. **Implementation, in a fresh session.** `spec-interview` hands you a one-line kick-off
+   message to paste into a new session. `spec-implement` then works from the spec and
+   `CONVENTIONS.md`. It ticks each checkbox the moment the item is verified, and an item left
+   unchecked needs `(manual)` or `NOT DONE: <reason>`. It cannot report the work as finished
+   until `scripts/check_spec.py` passes, so a green summary never hides an unchecked box.
 
 ### Specs are snapshots, not documentation
 
@@ -67,12 +69,30 @@ like an ADR: a snapshot of one development effort at a given moment in the life 
 repository. Once the feature is built, the spec stays as a record of what was decided and why.
 It is not updated to follow the code, and later specs read it only for historical intent.
 
+### Adapting the workflow to one repository
+
+Do not fork a skill to fit a repository. Put the repository's own rules in a section of its
+`AGENTS.md` (or `CLAUDE.md`), and the skills apply them on top of the generic workflow:
+
+```markdown
+## Spec workflow overrides
+- Specs for an app go in `apps/<slug>/docs/specs/`, numbered per app.
+- `CONVENTIONS.md` at the monorepo root applies to every app.
+- Definition of Done always includes: `make verify` passes.
+- Hand-off: the new session starts with the `app-builder` skill.
+```
+
+The section can change where specs and `CONVENTIONS.md` live, what to read or run before the
+interview, the Definition of Done and the hand-off. It cannot relax the interview itself, nor
+the checkbox protocol and completion gate of `spec-implement`.
+
 ## Skills
 
 | Skill | Description |
 | --- | --- |
 | [spec-interview](skills/spec-interview/SKILL.md) | Turns a rough feature idea into a spec file under `docs/specs/` by interviewing you one question at a time. |
 | [spec-conventions-interview](skills/spec-conventions-interview/SKILL.md) | Establishes or repairs the repo's `CONVENTIONS.md` through an interview. Prerequisite of `spec-interview`. |
+| [spec-implement](skills/spec-implement/SKILL.md) | Implements one spec in a fresh session, ticks its checkboxes as items are verified, and cannot finish until `scripts/check_spec.py` passes. |
 
 ## Install
 
@@ -87,7 +107,23 @@ npx skills add esavard/agent-skills --list
 npx skills add esavard/agent-skills --skill spec-interview
 ```
 
+### Plugin (Claude Code, managed updates)
+
+An alternative to skills.sh, not in addition to it (installing both gives you every skill
+twice). The plugin updates itself, but its files are read-only.
+
+```bash
+claude plugin marketplace add esavard/agent-skills
+claude plugin install esavard-agent-skills@esavard
+```
+
+Inside a session: `/plugin install esavard-agent-skills --marketplace esavard/agent-skills`.
+Install all three skills together: `spec-interview` hands off to `spec-implement` and calls
+`spec-conventions-interview`.
+
 ## Update
+
+Skills installed with skills.sh:
 
 ```bash
 # see which installed skills have a newer version
@@ -101,6 +137,17 @@ npx skills update spec-interview
 ```
 
 Add `-g` to update only global skills, `-p` for project skills, or `-y` to skip the scope prompt.
+A plugin install updates through Claude Code's `/plugin` manager instead.
+
+## Use in a project without committing a copy
+
+`npx skills add` records what it installed in `skills-lock.json`. Commit that file, ignore the
+installed directories, and each clone restores the skills from this repository:
+
+```bash
+npx skills add esavard/agent-skills -y     # once: writes skills-lock.json
+npx skills install                         # in a fresh clone: restores from skills-lock.json
+```
 
 ## Usage
 
@@ -116,14 +163,21 @@ frontmatter (`name`, `description`):
 skills/
   <skill-name>/
     SKILL.md
+    agents/openai.yaml    # Codex skill-picker metadata
+    scripts/              # optional helpers (e.g. spec-implement/scripts/check_spec.py)
+.claude-plugin/           # plugin.json + marketplace.json
+tests/                    # unit tests for helper scripts and manifest sync
 ```
+
+The plugin manifest must list every skill; `tests/test_manifest.py` fails when it does not.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Validate changes with:
 
 ```bash
-node scripts/validate-skills.mjs
+python3 scripts/validate_skills.py
+python3 -m unittest discover -s tests
 ```
 
 ## License

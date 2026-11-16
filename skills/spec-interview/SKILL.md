@@ -8,7 +8,7 @@ license: MIT
 
 Use this skill when the user has a rough idea, a bare-bones prompt, or a one-line feature request and wants a rigorous spec before any code gets written. The skill acts as an interviewer, not a stenographer: it interrogates the premise, forces precise definitions, and only writes the spec once the answers actually resolve the ambiguity.
 
-Output lands in `docs/specs/` **at the project root — never relative to the current working directory**. Every `docs/specs/` and `CONVENTIONS.md` path in this skill is anchored to the project root. Resolve the root once, before anything else: run `git rev-parse --show-toplevel`; if that fails (not a git repo), walk up from the current directory to the nearest ancestor containing `CONVENTIONS.md` or `docs/specs/`; if still unresolved, ask the user. If the session was started in a subdirectory, do not create a `docs/specs/` there, even if that subdirectory looks like a self-contained package or service.
+Output lands in `docs/specs/` **at the project root — never relative to the current working directory**. Every `docs/specs/` and `CONVENTIONS.md` path in this skill is anchored to the project root. Resolve the root once, before anything else: run `git rev-parse --show-toplevel`; if that fails (not a git repo), walk up from the current directory to the nearest ancestor containing `CONVENTIONS.md` or `docs/specs/`; if still unresolved, ask the user. If the session was started in a subdirectory, do not create a `docs/specs/` there, even if that subdirectory looks like a self-contained package or service. The only exception is a project override that names another location (see "Project overrides").
 
 If prior specs exist there, match their format. If `docs/specs/` is empty (first spec ever in this repo), use the section structure in Phase 2 directly — it's tech-agnostic and doesn't require prior art to follow.
 
@@ -16,13 +16,27 @@ Write the spec file in English, regardless of the language the interview was con
 
 When the spec is agreed upon, tell the user they MUST start a new session. Be insistent about it.
 
+## Project overrides
+
+Some repositories adapt this workflow: a monorepo with one spec directory per app, a `CONVENTIONS.md` shared by several nested repositories, extra Definition of Done items, a dedicated skill for the implementation session. Those rules belong to the repository, not to this skill, so a repository never needs its own modified copy of this file.
+
+Before Phase 0, read the agent instructions that apply to the project: `AGENTS.md`, `CLAUDE.md` or equivalent at the project root, plus any file they tell you to read first (a nested repository often points to its parent's). If they contain a section about the spec workflow (for example `## Spec workflow overrides`), its rules take precedence over this skill, on these points only:
+
+- where specs are written and how they are numbered (replaces `<project-root>/docs/specs/`);
+- where `CONVENTIONS.md` lives;
+- context to read, commands to run or reuse checks to make before or during the interview;
+- extra Definition of Done items;
+- the hand-off message, and what the user does with the accepted spec.
+
+Everything else here still applies: one question at a time, no vague term left standing, source code as the source of truth, no spec file before the ambiguity is resolved. Tell the user once, at the start of the interview, which overrides you are applying. No such section: nothing changes.
+
 ## Concept: Spec = Point-in-Time Record (ADR style)
 
 The source code is ALWAYS the source of truth. A spec NEVER is. This rule overrides anything a past spec says.
 
 - A file under `docs/specs/spec_NNN_<short_feature_description>.md` works like an ADR: a snapshot of one development effort at a given moment in the life of the repository, and a single-use execution contract for that effort.
 - It is NOT living system documentation. Once the feature is built, the spec stays as a record of what was decided and why.
-- Never edit a past spec to make it follow the code. The only edits allowed after a spec is agreed are the implementing agent ticking its checkboxes during that spec's own implementation. If the code later diverges, the code is right; a new decision gets a new spec.
+- Never edit a past spec to make it follow the code. The only edits allowed after a spec is agreed are the implementing agent ticking its checkboxes and annotating unchecked ones with `NOT DONE: <reason>` during that spec's own implementation. If the code later diverges, the code is right; a new decision gets a new spec.
 - Current system state comes from the codebase only: active code, unit/architecture tests, and `CONVENTIONS.md`.
 - When preparing a new spec, read past specs ONLY for historical intent. Any fact taken from a past spec (path, module, contract, pattern, behavior) MUST be verified against the current code before it is used in a question, a proposed default, or the new spec. If spec and code disagree, use the code and tell the user about the divergence.
 
@@ -72,6 +86,7 @@ Cover these areas, skipping anything the codebase or an existing doc already ans
 7. **Deliverables** — concrete artifacts (files, modules, test suites) expected at the end.
 8. **Implementation phasing** — only ask if the feature is large enough to warrant it (multiple independent milestones); skip for small specs.
 9. **Definition of Done** — beyond the standard checklist in `CONVENTIONS.md`, anything feature-specific that must hold (e.g. "legacy code untouched unless justified").
+10. **Manual items** — acceptance/DoD items an agent cannot perform: manual testing against a real database or device, production deploy, stakeholder sign-off. Propose the list; the user confirms it. Those items get the `(manual)` tag.
 
 Stop asking once every section above has an unambiguous answer — do not pad the interview with questions that don't change the resulting spec.
 
@@ -90,8 +105,9 @@ Only after the ambiguity is resolved:
    - `## 7. Engineering Rules` — do **not** repeat the boilerplate; write: "Follow `CONVENTIONS.md`." plus only the deltas/exceptions specific to this spec, if any.
    - `## 8. Definition of Done` (standard checklist derived from `CONVENTIONS.md` + feature-specific items from the interview)
 3. Directly under the spec's title, insert this line verbatim: `> Point-in-time record (ADR style): snapshot of one development effort, written <YYYY-MM-DD>. Source code is always the source of truth, never this spec. Implementing agent: if this spec disagrees with the current code, stop and ask. Do not update this file to follow later code changes.` Replace `<YYYY-MM-DD>` with the date the spec is written.
-4. At top of `## 4. Requirements` and `## 8. Definition of Done`, insert this instruction line verbatim, addressed to implementing agent: `> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item completes. Do not batch checkbox updates to end of session — re-prompting agent to backfill them is wasted turn.`
-5. Present the full file to the user for review before considering the spec final. Call out any answer you inferred rather than asked, so the user can correct it.
+4. At top of `## 4. Requirements` and `## 8. Definition of Done`, insert this instruction line verbatim, addressed to implementing agent: `> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item is verified, never batched at end of session. Item not done: leave unchecked and append `NOT DONE: <concrete reason>` on the same line. Items tagged `(manual)` need no reason. Before claiming completion, every unchecked item must carry `(manual)` or `NOT DONE:`; skill `spec-implement` (`scripts/check_spec.py`) verifies it.`
+5. Every requirement, plan step and Definition of Done item an agent must complete is a `- [ ]` checkbox. Items from interview area 10 start with `(manual)`, e.g. `- [ ] (manual) Smoke test checkout against Stripe test mode`; every other unchecked item will need a `NOT DONE: <reason>`. If prior specs in this repo use an older protocol wording, use the wording above anyway: it is the contract `spec-implement` enforces.
+6. Present the full file to the user for review before considering the spec final. Call out any answer you inferred rather than asked, so the user can correct it.
 
 ### Base Template (first spec in a repo, no prior art to match)
 
@@ -121,7 +137,7 @@ flowchart LR
 \`\`\`
 
 ## 4. Requirements
-> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item completes. Do not batch checkbox updates to end of session — re-prompting agent to backfill them is wasted turn.
+> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item is verified, never batched at end of session. Item not done: leave unchecked and append `NOT DONE: <concrete reason>` on the same line. Items tagged `(manual)` need no reason. Before claiming completion, every unchecked item must carry `(manual)` or `NOT DONE:`; skill `spec-implement` (`scripts/check_spec.py`) verifies it.
 - [ ] Requirement 1 — Acceptance: <observable, checkable condition>
 - [ ] Requirement 2 — Acceptance: <observable, checkable condition>
 
@@ -135,9 +151,10 @@ flowchart LR
 Follow `CONVENTIONS.md`. <deltas/exceptions specific to this spec, if any>
 
 ## 8. Definition of Done
-> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item completes. Do not batch checkbox updates to end of session — re-prompting agent to backfill them is wasted turn.
+> Implementing agent: check `[ ]` → `[x]` in THIS file the moment each item is verified, never batched at end of session. Item not done: leave unchecked and append `NOT DONE: <concrete reason>` on the same line. Items tagged `(manual)` need no reason. Before claiming completion, every unchecked item must carry `(manual)` or `NOT DONE:`; skill `spec-implement` (`scripts/check_spec.py`) verifies it.
 - [ ] <standard checklist item from CONVENTIONS.md>
 - [ ] <feature-specific item from interview>
+- [ ] (manual) <item only a human can verify, e.g. smoke test against a real database>
 ```
 
 Use this skeleton verbatim for spec_001 in any repo; once it exists, later specs should match its established format instead of re-deriving from this template.
@@ -148,9 +165,9 @@ When the spec is complete and agreed upon:
 1. Explicitly instruct the user to **STOP and open a FRESH session** before writing any code. Be insistent—explain that keeping execution separate from the interview context prevents hallucinations and saves tokens.
 2. Provide a ready-to-copy kick-off message for the new session, formatted like this:
 
-> "Implement `docs/specs/spec_NNN_<short_feature_description>.md`."
+> "Use spec-implement. Implement `docs/specs/spec_NNN_<short_feature_description>.md`."
 
-Keep the kick-off message to that one line. The rules the implementing agent needs (follow `CONVENTIONS.md`, source code is the source of truth, tick checkboxes as items complete) are already written in the spec file itself; do not repeat them in the message.
+Keep the kick-off message to that one line. The rules the implementing agent needs (follow `CONVENTIONS.md`, source code is the source of truth, the checkbox protocol) are already written in the spec file itself, so the spec still works if `spec-implement` is not installed; do not repeat them in the message.
 
 ## Guardrails
 
